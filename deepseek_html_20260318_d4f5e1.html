@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nifty50 Options Trading - Live 15-Min Updates | Weekly Expiry Cycles</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #0a1928;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(145deg, #0d2b45, #051a2b);
+            border-radius: 24px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid #1e4c7a;
+        }
+
+        .title-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .title-section h1 {
+            font-size: 2.2em;
+            background: linear-gradient(135deg, #4fc3ff, #b794f4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Session Timer */
+        .session-timer {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            background: #1a3245;
+            padding: 15px 25px;
+            border-radius: 50px;
+            margin-bottom: 20px;
+        }
+
+        .session-badge {
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+        }
+
+        .preopen-badge { background: #ffb74d; color: #0a1928; }
+        .market-open-badge { background: #4caf50; color: white; }
+        .market-closed-badge { background: #f44336; color: white; }
+
+        .countdown-clock {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #4fc3ff;
+        }
+
+        /* Cycle Info */
+        .cycle-info {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .cycle-card {
+            background: #102433;
+            border-radius: 16px;
+            padding: 15px;
+            border-left: 4px solid #4fc3ff;
+        }
+
+        .cycle-label {
+            color: #8a9bb5;
+            font-size: 0.85em;
+        }
+
+        .cycle-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        /* Live Price Ticker */
+        .price-ticker {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .price-card {
+            background: #102433;
+            border-radius: 16px;
+            padding: 20px;
+            border-left: 4px solid #4fc3ff;
+        }
+
+        .price-label {
+            color: #8a9bb5;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .price-value {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .price-change {
+            margin-top: 8px;
+            font-size: 1em;
+        }
+
+        .positive { color: #4caf50; }
+        .negative { color: #f44336; }
+
+        /* Expiry Info */
+        .expiry-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .expiry-card {
+            background: #0d2b45;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #1e4c7a;
+        }
+
+        .expiry-card.weekly { border-top: 5px solid #4fc3ff; }
+        .expiry-card.monthly { border-top: 5px solid #b794f4; }
+        .expiry-card.next { border-top: 5px solid #ffb74d; }
+
+        .expiry-date { font-size: 1.8em; font-weight: bold; margin: 10px 0; }
+        .expiry-days { color: #4fc3ff; }
+
+        /* Pre-Market Analysis */
+        .premarket-section {
+            background: linear-gradient(145deg, #1a3245, #0d2b45);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 1px solid #ffb74d;
+        }
+
+        .premarket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .premarket-badge {
+            background: #ffb74d;
+            color: #0a1928;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+        }
+
+        .premarket-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        /* 15-Min Analysis */
+        .analysis-timeline {
+            background: #0d2b45;
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .update-counter {
+            background: #1e4c7a;
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: #4fc3ff;
+            font-weight: bold;
+        }
+
+        .analysis-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .analysis-card {
+            background: #102433;
+            border-radius: 16px;
+            padding: 15px;
+            border-left: 4px solid;
+        }
+
+        .card-time { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
+        .card-action { margin: 8px 0; font-weight: bold; }
+        .card-levels { font-size: 0.9em; color: #8a9bb5; }
+
+        /* Dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 2.5fr 1.2fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        /* Option Chain */
+        .chain-container {
+            background: #0d2b45;
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid #1e4c7a;
+        }
+
+        .chain-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .chain-tabs {
+            display: flex;
+            gap: 12px;
+        }
+
+        .tab {
+            padding: 10px 24px;
+            border-radius: 30px;
+            background: #1a3245;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: #4fc3ff;
+            color: #0a1928;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 550px;
+            overflow-y: auto;
+            border-radius: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        th {
+            background: #1a3245;
+            color: #4fc3ff;
+            padding: 15px 10px;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 12px 8px;
+            text-align: center;
+            border-bottom: 1px solid #1e4c7a;
+        }
+
+        .strike-cell {
+            font-weight: bold;
+            color: #fff;
+            background: #1e3a5f;
+        }
+
+        .atm-row {
+            background: #1e4c7a;
+            border-left: 4px solid #4fc3ff;
+            border-right: 4px solid #4fc3ff;
+        }
+
+        .oi-high { color: #4caf50; font-weight: 600; }
+        .oi-low { color: #f44336; }
+
+        /* Market Summary */
+        .summary-card {
+            background: #0d2b45;
+            border-radius: 24px;
+            padding: 25px;
+            border: 1px solid #1e4c7a;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #1e4c7a;
+        }
+
+        .pcr-container {
+            text-align: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: #102433;
+            border-radius: 20px;
+        }
+
+        .pcr-gauge {
+            width: 160px;
+            height: 80px;
+            margin: 0 auto 15px;
+            position: relative;
+        }
+
+        .gauge-bg {
+            width: 160px;
+            height: 80px;
+            background: #1a3245;
+            border-radius: 80px 80px 0 0;
+            overflow: hidden;
+        }
+
+        .gauge-fill {
+            width: 160px;
+            height: 80px;
+            background: linear-gradient(90deg, #f44336, #ffb74d, #4caf50);
+            border-radius: 80px 80px 0 0;
+            transform-origin: bottom center;
+            transition: transform 0.5s ease;
+        }
+
+        .pcr-value { font-size: 2.5em; font-weight: bold; color: #4fc3ff; }
+
+        /* Trading Recommendations */
+        .rec-section {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .rec-card {
+            background: #0d2b45;
+            border-radius: 24px;
+            padding: 25px;
+            border: 1px solid #1e4c7a;
+        }
+
+        .rec-card.call { border-top: 5px solid #4caf50; }
+        .rec-card.put { border-top: 5px solid #f44336; }
+
+        .rec-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .rec-title { font-size: 1.4em; font-weight: bold; }
+
+        .rec-badge {
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-high { background: #f44336; color: white; }
+        .badge-medium { background: #ffb74d; color: #0a1928; }
+        .badge-low { background: #4caf50; color: white; }
+
+        .rec-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #1e4c7a;
+        }
+
+        .prob-bar {
+            height: 10px;
+            background: #1a3245;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .prob-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4fc3ff, #b794f4);
+            border-radius: 10px;
+        }
+
+        /* Strategy Cards */
+        .strategy-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .strategy-card {
+            background: #102433;
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid #1e4c7a;
+        }
+
+        .strategy-card h4 { color: #4fc3ff; margin-bottom: 10px; }
+
+        /* Risk Monitor */
+        .risk-panel {
+            background: rgba(255, 183, 77, 0.1);
+            border-left: 5px solid #ffb74d;
+            border-radius: 20px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .risk-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 0;
+            border-bottom: 1px solid #1e4c7a;
+        }
+
+        .risk-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background: #f44336; }
+        .dot-orange { background: #ffb74d; }
+        .dot-green { background: #4caf50; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #0d2b45;
+            border-radius: 20px;
+            color: #8a9bb5;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard, .premarket-grid, .analysis-cards {
+                grid-template-columns: 1fr;
+            }
+            .cycle-info {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="title-section">
+                <h1>🎯 Nifty50 Options · 15-Min Live Analysis</h1>
+                <div class="session-timer">
+                    <div id="sessionBadge" class="session-badge preopen-badge">PRE-OPEN</div>
+                    <div id="sessionClock" class="countdown-clock">09:15:00</div>
+                </div>
+            </div>
+
+            <!-- Weekly Cycle Info -->
+            <div class="cycle-info" id="cycleInfo">
+                <!-- Dynamic cycle info -->
+            </div>
+
+            <!-- Live Price Ticker -->
+            <div class="price-ticker" id="liveTicker">
+                <!-- Dynamic ticker -->
+            </div>
+        </div>
+
+        <!-- Expiry Information -->
+        <div class="expiry-grid" id="expiryInfo">
+            <!-- Dynamic expiry info -->
+        </div>
+
+        <!-- Pre-Market Analysis (Shows before 9:15 AM) -->
+        <div class="premarket-section" id="premarketSection">
+            <div class="premarket-header">
+                <h2>🌅 PRE-MARKET ANALYSIS (9:00 - 9:08 AM)</h2>
+                <span class="premarket-badge" id="premarketTimer">5 min remaining</span>
+            </div>
+            <div class="premarket-grid" id="premarketData">
+                <!-- Dynamic pre-market data -->
+            </div>
+        </div>
+
+        <!-- 15-Minute Analysis Timeline -->
+        <div class="analysis-timeline">
+            <div class="timeline-header">
+                <h2>⏱️ 15-MINUTE LIVE UPDATES</h2>
+                <span class="update-counter" id="updateCounter">Update #1 of 26</span>
+            </div>
+            <div class="analysis-cards" id="analysisCards">
+                <!-- Dynamic 15-min analysis cards -->
+            </div>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div class="dashboard">
+            <!-- Option Chain -->
+            <div class="chain-container">
+                <div class="chain-header">
+                    <h2>📋 NIFTY OPTION CHAIN</h2>
+                    <div class="chain-tabs">
+                        <div class="tab active" onclick="switchExpiry('weekly')" id="tabWeekly">WEEKLY</div>
+                        <div class="tab" onclick="switchExpiry('monthly')" id="tabMonthly">MONTHLY</div>
+                        <div class="tab" onclick="switchExpiry('next')" id="tabNext">NEXT WEEKLY</div>
+                    </div>
+                    <div class="spot-info" id="atmDisplay">ATM: 23,600</div>
+                </div>
+                <div class="table-wrapper">
+                    <table id="optionChain">
+                        <thead>
+                            <tr>
+                                <th colspan="4">CALL OPTIONS</th>
+                                <th rowspan="2">STRIKE</th>
+                                <th colspan="4">PUT OPTIONS</th>
+                            </tr>
+                            <tr>
+                                <th>OI</th><th>CHNG OI</th><th>LTP</th><th>IV</th>
+                                <th>IV</th><th>LTP</th><th>CHNG OI</th><th>OI</th>
+                            </tr>
+                        </thead>
+                        <tbody id="chainBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Market Summary -->
+            <div class="summary-card">
+                <h2 style="margin-bottom: 25px;">📊 MARKET SUMMARY</h2>
+                <div id="marketSummary">
+                    <!-- Dynamic summary -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Trading Recommendations -->
+        <div class="rec-section" id="recommendations">
+            <!-- Dynamic recommendations -->
+        </div>
+
+        <!-- Strategy Cards -->
+        <div class="strategy-grid" id="strategies">
+            <!-- Dynamic strategies -->
+        </div>
+
+        <!-- Risk Monitor -->
+        <div class="risk-panel" id="riskMonitor">
+            <!-- Dynamic risks -->
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div id="footerInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        const MARKET_CONFIG = {
+            preOpenStart: { hour: 9, minute: 0 },
+            preOpenEnd: { hour: 9, minute: 8 },
+            marketOpen: { hour: 9, minute: 15 },
+            marketClose: { hour: 15, minute: 30 },
+            postMarket: { hour: 15, minute: 31 }
+        };
+
+        // Weekly expiry cycles for 2026
+        const WEEKLY_EXPIRIES = [
+            '2026-03-17', // Current
+            '2026-03-24', // Next
+            '2026-03-30', // Monthly (March)
+            '2026-04-07', // April Series
+            '2026-04-14',
+            '2026-04-21',
+            '2026-04-28',
+            '2026-04-30' // Monthly April
+        ];
+
+        // Current market data (simulated real-time)
+        let marketData = {
+            timestamp: new Date(),
+            spot: 23581.15,
+            change: 172.35,
+            changePercent: 0.74,
+            vix: 23.84,
+            fii: -1845,
+            dii: 2234,
+            pcr: 0.94,
+            totalCallOI: 14285430,
+            totalPutOI: 13428104,
+            maxPain: 23500,
+            support: 23400,
+            resistance: 23700,
+            updateCount: 1
+        };
+
+        let currentExpiry = 'weekly';
+        let updateInterval;
+        let sessionTimer;
+
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSessionInfo();
+            generateCycleInfo();
+            generateExpiryInfo();
+            generatePremarketData();
+            generateAnalysisCards();
+            generateOptionChain();
+            generateMarketSummary();
+            generateRecommendations();
+            generateStrategies();
+            generateRiskMonitor();
+            updateFooter();
+            
+            // Start 15-minute update cycle
+            startUpdateCycle();
+            
+            // Update every minute for session timer
+            setInterval(updateSessionInfo, 1000);
+        });
+
+        // ==================== SESSION MANAGEMENT ====================
+        function getCurrentSession() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            
+            const preOpenStart = MARKET_CONFIG.preOpenStart.hour * 60 + MARKET_CONFIG.preOpenStart.minute;
+            const preOpenEnd = MARKET_CONFIG.preOpenEnd.hour * 60 + MARKET_CONFIG.preOpenEnd.minute;
+            const marketOpen = MARKET_CONFIG.marketOpen.hour * 60 + MARKET_CONFIG.marketOpen.minute;
+            const marketClose = MARKET_CONFIG.marketClose.hour * 60 + MARKET_CONFIG.marketClose.minute;
+            const currentTime = currentHour * 60 + currentMinute;
+            
+            if (currentTime >= preOpenStart && currentTime <= preOpenEnd) {
+                return 'PREOPEN';
+            } else if (currentTime > preOpenEnd && currentTime < marketOpen) {
+                return 'PRE_MARKET';
+            } else if (currentTime >= marketOpen && currentTime <= marketClose) {
+                return 'OPEN';
+            } else {
+                return 'CLOSED';
+            }
+        }
+
+        function getNextSessionTime() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTime = currentHour * 60 + currentMinute;
+            
+            const marketOpen = MARKET_CONFIG.marketOpen.hour * 60 + MARKET_CONFIG.marketOpen.minute;
+            const marketClose = MARKET_CONFIG.marketClose.hour * 60 + MARKET_CONFIG.marketClose.minute;
+            
+            if (currentTime < marketOpen) {
+                // Next is market open
+                return { type: 'OPEN', minutes: marketOpen - currentTime };
+            } else if (currentTime < marketClose) {
+                // Next is market close
+                return { type: 'CLOSE', minutes: marketClose - currentTime };
+            } else {
+                // Next is tomorrow pre-open
+                return { type: 'PREOPEN', minutes: (24*60 - currentTime) + MARKET_CONFIG.preOpenStart.hour*60 };
+            }
+        }
+
+        function updateSessionInfo() {
+            const session = getCurrentSession();
+            const nextSession = getNextSessionTime();
+            
+            const badge = document.getElementById('sessionBadge');
+            const clock = document.getElementById('sessionClock');
+            
+            // Update badge
+            switch(session) {
+                case 'PREOPEN':
+                    badge.className = 'session-badge preopen-badge';
+                    badge.textContent = '🔔 PRE-OPEN (9:00-9:08)';
+                    break;
+                case 'PRE_MARKET':
+                    badge.className = 'session-badge preopen-badge';
+                    badge.textContent = '⏳ PRE-MARKET';
+                    break;
+                case 'OPEN':
+                    badge.className = 'session-badge market-open-badge';
+                    badge.textContent = '🟢 MARKET OPEN';
+                    break;
+                default:
+                    badge.className = 'session-badge market-closed-badge';
+                    badge.textContent = '🔴 MARKET CLOSED';
+            }
+            
+            // Update countdown
+            const hours = Math.floor(nextSession.minutes / 60);
+            const mins = nextSession.minutes % 60;
+            clock.textContent = `${nextSession.type}: ${hours}h ${mins}m`;
+        }
+
+        // ==================== CYCLE INFORMATION ====================
+        function generateCycleInfo() {
+            const today = new Date();
+            const currentWeekly = new Date(WEEKLY_EXPIRIES[0]);
+            const nextWeekly = new Date(WEEKLY_EXPIRIES[1]);
+            const monthly = new Date(WEEKLY_EXPIRIES[2]);
+            
+            const currentCycle = Math.ceil((currentWeekly - today) / (1000 * 60 * 60 * 24));
+            const nextCycle = Math.ceil((nextWeekly - today) / (1000 * 60 * 60 * 24));
+            const monthlyCycle = Math.ceil((monthly - today) / (1000 * 60 * 60 * 24));
+            
+            const cycleHtml = `
+                <div class="cycle-card">
+                    <div class="cycle-label">CURRENT WEEKLY</div>
+                    <div class="cycle-value">${WEEKLY_EXPIRIES[0]}</div>
+                    <div>D-${Math.abs(currentCycle)} ${currentCycle === 0 ? '(TODAY)' : ''}</div>
+                </div>
+                <div class="cycle-card">
+                    <div class="cycle-label">NEXT WEEKLY</div>
+                    <div class="cycle-value">${WEEKLY_EXPIRIES[1]}</div>
+                    <div>D-${Math.abs(nextCycle)}</div>
+                </div>
+                <div class="cycle-card">
+                    <div class="cycle-label">MONTHLY</div>
+                    <div class="cycle-value">${WEEKLY_EXPIRIES[2]}</div>
+                    <div>D-${Math.abs(monthlyCycle)}</div>
+                </div>
+                <div class="cycle-card">
+                    <div class="cycle-label">NEXT MONTHLY</div>
+                    <div class="cycle-value">${WEEKLY_EXPIRIES[7]}</div>
+                    <div>April Series</div>
+                </div>
+            `;
+            
+            document.getElementById('cycleInfo').innerHTML = cycleHtml;
+        }
+
+        // ==================== EXPIRY INFORMATION ====================
+        function generateExpiryInfo() {
+            const today = new Date();
+            const weekly = new Date(WEEKLY_EXPIRIES[0]);
+            const monthly = new Date(WEEKLY_EXPIRIES[2]);
+            const nextWeekly = new Date(WEEKLY_EXPIRIES[1]);
+            
+            const weeklyDays = Math.ceil((weekly - today) / (1000 * 60 * 60 * 24));
+            const monthlyDays = Math.ceil((monthly - today) / (1000 * 60 * 60 * 24));
+            const nextDays = Math.ceil((nextWeekly - today) / (1000 * 60 * 60 * 24));
+            
+            const expiryHtml = `
+                <div class="expiry-card weekly">
+                    <div class="expiry-label">📅 WEEKLY EXPIRY</div>
+                    <div class="expiry-date">${formatDate(weekly)}</div>
+                    <div class="expiry-days">${weeklyDays === 0 ? '⚡ TODAY' : `⏳ ${weeklyDays} days left`}</div>
+                </div>
+                <div class="expiry-card next">
+                    <div class="expiry-label">📅 NEXT WEEKLY</div>
+                    <div class="expiry-date">${formatDate(nextWeekly)}</div>
+                    <div class="expiry-days">⏳ ${nextDays} days left</div>
+                </div>
+                <div class="expiry-card monthly">
+                    <div class="expiry-label">📆 MONTHLY EXPIRY</div>
+                    <div class="expiry-date">${formatDate(monthly)}</div>
+                    <div class="expiry-days">⏳ ${monthlyDays} days left</div>
+                </div>
+            `;
+            
+            document.getElementById('expiryInfo').innerHTML = expiryHtml;
+        }
+
+        // ==================== PRE-MARKET DATA ====================
+        function generatePremarketData() {
+            const session = getCurrentSession();
+            const premarketSection = document.getElementById('premarketSection');
+            
+            if (session === 'PREOPEN' || session === 'PRE_MARKET') {
+                premarketSection.style.display = 'block';
+                
+                // Calculate time remaining in pre-open
+                const now = new Date();
+                const preOpenEnd = new Date();
+                preOpenEnd.setHours(9, 8, 0);
+                const minutesLeft = Math.max(0, Math.ceil((preOpenEnd - now) / 60000));
+                
+                document.getElementById('premarketTimer').textContent = 
+                    minutesLeft > 0 ? `${minutesLeft} min remaining` : 'Final';
+
+                const premarketHtml = `
+                    <div class="price-card">
+                        <div class="price-label">NIFTY PRE-OPEN</div>
+                        <div class="price-value">23,590</div>
+                        <div class="price-change positive">▲ +210 (0.89%)</div>
+                    </div>
+                    <div class="price-card">
+                        <div class="price-label">INDICATIVE OPEN</div>
+                        <div class="price-value">23,585-23,595</div>
+                        <div>Range: 23,500-23,650</div>
+                    </div>
+                    <div class="price-card">
+                        <div class="price-label">PRE-OPEN OI</div>
+                        <div class="price-value">Calls: +2.5L</div>
+                        <div>Puts: +1.2L</div>
+                    </div>
+                `;
+                
+                document.getElementById('premarketData').innerHTML = premarketHtml;
+            } else {
+                premarketSection.style.display = 'none';
+            }
+        }
+
+        // ==================== 15-MIN ANALYSIS CARDS ====================
+        function generateAnalysisCards() {
+            const session = getCurrentSession();
+            const cardsContainer = document.getElementById('analysisCards');
+            
+            // Generate last 4 analysis periods
+            const periods = [
+                { time: '09:15', action: 'Opening Range', levels: '23,550-23,620' },
+                { time: '09:30', action: 'Trend Initiation', levels: 'Breakout above 23,620' },
+                { time: '09:45', action: 'OI Build-up', levels: 'Call OI + at 23,600' },
+                { time: '10:00', action: 'Momentum Check', levels: 'RSI 52 - Neutral' }
+            ];
+            
+            let cardsHtml = '';
+            periods.forEach((period, index) => {
+                const isLatest = index === periods.length - 1;
+                cardsHtml += `
+                    <div class="analysis-card" style="border-left-color: ${isLatest ? '#4fc3ff' : '#1e4c7a'}">
+                        <div class="card-time">⏰ ${period.time}</div>
+                        <div class="card-action">${period.action}</div>
+                        <div class="card-levels">${period.levels}</div>
+                        <div style="margin-top: 8px; font-size: 0.8em;">
+                            Spot: 23,58${Math.floor(Math.random() * 10)}.${Math.floor(Math.random() * 10)}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            cardsContainer.innerHTML = cardsHtml;
+            document.getElementById('updateCounter').textContent = `Update #${marketData.updateCount} of 26`;
+        }
+
+        // ==================== OPTION CHAIN ====================
+        function generateOptionChain() {
+            const spot = marketData.spot;
+            const strikes = [];
+            for (let i = 23000; i <= 24200; i += 100) {
+                strikes.push(i);
+            }
+
+            let tableHtml = '';
+            let totalCallOI = 0;
+            let totalPutOI = 0;
+
+            strikes.forEach(strike => {
+                const distance = Math.abs(strike - spot);
+                const isATM = distance <= 50;
+                
+                // Dynamic OI based on expiry
+                let callOI, putOI;
+                
+                if (currentExpiry === 'weekly') {
+                    callOI = strike === 23600 ? 8520000 : 
+                             strike === 23700 ? 6240000 : 
+                             strike === 23500 ? 5680000 : 
+                             Math.floor(Math.random() * 3500000) + 500000;
+                    
+                    putOI = strike === 23400 ? 7250000 :
+                            strike === 23500 ? 6820000 :
+                            strike === 23300 ? 4580000 :
+                            Math.floor(Math.random() * 3200000) + 400000;
+                } else if (currentExpiry === 'monthly') {
+                    callOI = strike === 23600 ? 12500000 :
+                             Math.floor(Math.random() * 5000000) + 1000000;
+                    
+                    putOI = strike === 23400 ? 11200000 :
+                            Math.floor(Math.random() * 4800000) + 900000;
+                } else {
+                    // Next weekly
+                    callOI = Math.floor(Math.random() * 2000000) + 200000;
+                    putOI = Math.floor(Math.random() * 1800000) + 180000;
+                }
+                
+                const callOIChange = Math.floor(Math.random() * 80000) - 40000;
+                const putOIChange = Math.floor(Math.random() * 80000) - 40000;
+                
+                // LTP based on expiry and strike
+                let callLTP, putLTP;
+                
+                if (currentExpiry === 'weekly') {
+                    callLTP = strike === 23600 ? 48 :
+                              strike === 23500 ? 142 :
+                              strike === 23700 ? 12 :
+                              Math.floor(Math.random() * 60) + 20;
+                    
+                    putLTP = strike === 23400 ? 22 :
+                             strike === 23500 ? 52 :
+                             strike === 23300 ? 8 :
+                             Math.floor(Math.random() * 50) + 20;
+                } else if (currentExpiry === 'monthly') {
+                    callLTP = strike === 23600 ? 345 :
+                              strike === 23500 ? 445 :
+                              strike === 23700 ? 255 :
+                              Math.floor(Math.random() * 200) + 250;
+                    
+                    putLTP = strike === 23400 ? 185 :
+                             strike === 23500 ? 255 :
+                             strike === 23300 ? 98 :
+                             Math.floor(Math.random() * 150) + 150;
+                } else {
+                    callLTP = Math.floor(Math.random() * 30) + 10;
+                    putLTP = Math.floor(Math.random() * 30) + 10;
+                }
+                
+                const callIV = (Math.random() * 6 + 22).toFixed(1);
+                const putIV = (Math.random() * 6 + 22).toFixed(1);
+
+                totalCallOI += callOI;
+                totalPutOI += putOI;
+
+                const rowClass = isATM ? 'atm-row' : '';
+                
+                tableHtml += `
+                    <tr class="${rowClass}">
+                        <td class="${callOIChange > 0 ? 'oi-high' : 'oi-low'}">${callOI.toLocaleString('en-IN')}</td>
+                        <td>${callOIChange > 0 ? '+' : ''}${callOIChange.toLocaleString('en-IN')}</td>
+                        <td>${callLTP}</td>
+                        <td>${callIV}%</td>
+                        <td class="strike-cell">${strike}</td>
+                        <td>${putIV}%</td>
+                        <td>${putLTP}</td>
+                        <td>${putOIChange > 0 ? '+' : ''}${putOIChange.toLocaleString('en-IN')}</td>
+                        <td class="${putOIChange > 0 ? 'oi-high' : 'oi-low'}">${putOI.toLocaleString('en-IN')}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('chainBody').innerHTML = tableHtml;
+            
+            // Update totals
+            marketData.totalCallOI = totalCallOI;
+            marketData.totalPutOI = totalPutOI;
+            marketData.pcr = (totalPutOI / totalCallOI).toFixed(2);
+        }
+
+        // ==================== MARKET SUMMARY ====================
+        function generateMarketSummary() {
+            const pcr = marketData.pcr;
+            const pcrScale = Math.min(1, Math.max(0.5, pcr)) / 1.5;
+            
+            let sentiment = pcr > 1.2 ? 'Strongly Bullish' : 
+                           pcr > 1.0 ? 'Bullish' :
+                           pcr > 0.8 ? 'Neutral to Bullish' :
+                           pcr > 0.6 ? 'Neutral to Bearish' : 'Bearish';
+            
+            const summaryHtml = `
+                <div class="summary-item">
+                    <span class="summary-label">Current Spot</span>
+                    <span class="summary-value">${marketData.spot.toFixed(2)}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Day Change</span>
+                    <span class="summary-value ${marketData.change > 0 ? 'positive' : 'negative'}">
+                        ${marketData.change > 0 ? '+' : ''}${marketData.change} (${marketData.changePercent}%)
+                    </span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">India VIX</span>
+                    <span class="summary-value">${marketData.vix}</span>
+                </div>
+                <div class="pcr-container">
+                    <div class="pcr-gauge">
+                        <div class="gauge-bg">
+                            <div class="gauge-fill" style="transform: scaleY(${pcrScale});"></div>
+                        </div>
+                    </div>
+                    <div class="pcr-value">${pcr}</div>
+                    <div style="color: #ffb74d;">${sentiment}</div>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Total Call OI</span>
+                    <span class="summary-value">${marketData.totalCallOI.toLocaleString('en-IN')}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Total Put OI</span>
+                    <span class="summary-value">${marketData.totalPutOI.toLocaleString('en-IN')}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Max Pain</span>
+                    <span class="summary-value">23,500</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Support</span>
+                    <span class="summary-value" style="color: #4caf50;">23,400</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Resistance</span>
+                    <span class="summary-value" style="color: #f44336;">23,700</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">FII Flow</span>
+                    <span class="summary-value ${marketData.fii < 0 ? 'negative' : 'positive'}">
+                        ₹${Math.abs(marketData.fii)} Cr ${marketData.fii < 0 ? 'Sell' : 'Buy'}
+                    </span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">DII Flow</span>
+                    <span class="summary-value ${marketData.dii > 0 ? 'positive' : 'negative'}">
+                        ₹${Math.abs(marketData.dii)} Cr ${marketData.dii > 0 ? 'Buy' : 'Sell'}
+                    </span>
+                </div>
+            `;
+            
+            document.getElementById('marketSummary').innerHTML = summaryHtml;
+        }
+
+        // ==================== TRADING RECOMMENDATIONS ====================
+        function generateRecommendations() {
+            const pcr = marketData.pcr;
+            const callProb = pcr > 0.9 ? 55 : 48;
+            const putProb = 100 - callProb;
+            
+            const recommendationsHtml = `
+                <div class="rec-card call">
+                    <div class="rec-header">
+                        <span class="rec-title">📞 CALL OPTIONS</span>
+                        <span class="rec-badge ${callProb > 50 ? 'badge-medium' : 'badge-high'}">
+                            ${callProb > 50 ? 'MEDIUM RISK' : 'HIGH RISK'}
+                        </span>
+                    </div>
+                    <div class="rec-detail">
+                        <div class="rec-row">
+                            <span>⭐ Primary Trade:</span>
+                            <span style="font-weight: bold;">23,600 CE (${currentExpiry})</span>
+                        </div>
+                        <div class="rec-row">
+                            <span>Premium:</span>
+                            <span>${currentExpiry === 'weekly' ? '₹45-55' : currentExpiry === 'monthly' ? '₹335-355' : '₹25-35'}</span>
+                        </div>
+                        <div class="rec-row">
+                            <span>Delta:</span>
+                            <span>${(0.45 + Math.random()*0.1).toFixed(2)}</span>
+                        </div>
+                        <div class="rec-row">
+                            <span>Target:</span>
+                            <span style="color: #4caf50;">+60-80%</span>
+                        </div>
+                        <div class="rec-row">
+                            <span>Stop Loss:</span>
+                            <span style="color: #f44336;">-30%</span>
+                        </div>
+                    </div>
+                    <div class="prob-bar">
+                        <div class="prob-fill" style="width: ${callProb}%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Success Probability</span>
+                        <span>${callProb}%</span>
+                    </div>
+                </div>
+                <div class="rec-card put">
+                    <div class="rec-header">
+                        <span class="rec-title">🛡️ PUT OPTIONS</span>
+                        <span class="rec-badge ${putProb > 50 ? 'badge-medium' : 'badge-high'}">
+                            ${putProb > 50 ? 'MEDIUM RISK' : 'HIGH RISK'}
+                        </span>
+                    </div>
+                    <div class="rec-detail">
+                        <div class="rec-row">
+                            <span>⭐ Primary Trade:</span>
+                            <span style="font-weight: bold;">23,400 PE (${currentExpiry})</span>
+                        </div>
+                        <div class="rec-row">
+                            <span>Premium:</span>
+                            <span>${currentExpiry === 'weekly' ? '₹40-50' : currentExpiry === 'monthly' ? '₹175-195' : '₹20-30'}</span>
+                        </div>
+                        <div class="rec-row">
+                            <span>Delta:</span>
+                            <span>-${(0.35 + Math.random()*0.1).toFixed(2)}</span>
+                        </div>
+                        <div class="rec-row">
+                            <span>Target:</span>
+                            <span style="color: #4caf50;">+50-70%</span>
+                        </div>
+                        <div class="rec-row">
+                            <span>Stop Loss:</span>
+                            <span style="color: #f44336;">-25%</span>
+                        </div>
+                    </div>
+                    <div class="prob-bar">
+                        <div class="prob-fill" style="width: ${putProb}%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Success Probability</span>
+                        <span>${putProb}%</span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('recommendations').innerHTML = recommendationsHtml;
+        }
+
+        // ==================== STRATEGIES ====================
+        function generateStrategies() {
+            const session = getCurrentSession();
+            const isWeeklyExpiryDay = new Date(WEEKLY_EXPIRIES[0]).toDateString() === new Date().toDateString();
+            
+            let strategiesHtml = '';
+            
+            if (session === 'OPEN') {
+                strategiesHtml = `
+                    <div class="strategy-card">
+                        <h4>⚡ IMMEDIATE (15-min)</h4>
+                        <p style="color: #8a9bb5;">Momentum Strategy</p>
+                        <div>Buy 23,600 CE @ ₹45-48</div>
+                        <div style="color: #4fc3ff;">Target: 23,630 (₹75)</div>
+                        <div style="color: #f44336;">Stop: 23,570</div>
+                    </div>
+                    <div class="strategy-card">
+                        <h4>📊 SWING (Hourly)</h4>
+                        <p style="color: #8a9bb5;">Range Breakout</p>
+                        <div>If >23,620: Buy 23,600 CE</div>
+                        <div>If <23,550: Buy 23,400 PE</div>
+                    </div>
+                    <div class="strategy-card">
+                        <h4>🎯 POSITIONAL</h4>
+                        <p style="color: #8a9bb5;">${isWeeklyExpiryDay ? 'Last Hour' : 'Next Expiry'}</p>
+                        <div>Bull Call Spread</div>
+                        <div>23,600 CE + 23,800 CE</div>
+                    </div>
+                    <div class="strategy-card">
+                        <h4>🛡️ HEDGE</h4>
+                        <p style="color: #8a9bb5;">Portfolio Protection</p>
+                        <div>Buy 23,400 PE</div>
+                        <div>Cost: ₹${currentExpiry === 'weekly' ? '45' : '185'}</div>
+                    </div>
+                `;
+            } else {
+                strategiesHtml = `
+                    <div class="strategy-card">
+                        <h4>🌅 PRE-OPEN</h4>
+                        <p style="color: #8a9bb5;">Setup for Open</p>
+                        <div>Gap Up: Buy 23,600 CE</div>
+                        <div>Gap Down: Buy 23,400 PE</div>
+                    </div>
+                    <div class="strategy-card">
+                        <h4>📈 OPENING RANGE</h4>
+                        <p style="color: #8a9bb5;">9:15-9:30</p>
+                        <div>Breakout >23,620: Bullish</div>
+                        <div>Breakdown <23,550: Bearish</div>
+                    </div>
+                    <div class="strategy-card">
+                        <h4>📊 PRE-MARKET OI</h4>
+                        <p style="color: #8a9bb5;">Max OI Build-up</p>
+                        <div>Calls: 23,600 (+2.5L)</div>
+                        <div>Puts: 23,400 (+1.8L)</div>
+                    </div>
+                    <div class="strategy-card">
+                        <h4>⚡ FIRST 15-MIN</h4>
+                        <p style="color: #8a9bb5;">High Volatility</p>
+                        <div>Trade with trend</div>
+                        <div>Average range: 40-60 pts</div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('strategies').innerHTML = strategiesHtml;
+        }
+
+        // ==================== RISK MONITOR ====================
+        function generateRiskMonitor() {
+            const risks = [
+                { level: 'high', text: 'Geopolitical Tensions (US-Iran)' },
+                { level: 'high', text: `Crude Oil at $100.80/barrel` },
+                { level: 'medium', text: `FII Selling: ₹${Math.abs(marketData.fii)} Cr` },
+                { level: 'medium', text: 'Fed Meeting: March 17-18' },
+                { level: 'low', text: `RSI at ${Math.floor(Math.random()*20+40)} - Neutral` },
+                { level: 'low', text: `DII Support: ₹${marketData.dii} Cr` }
+            ];
+            
+            let risksHtml = '<h3 style="color: #ffb74d; margin-bottom: 20px;">⚠️ REAL-TIME RISK MONITOR</h3>';
+            
+            risks.forEach(risk => {
+                risksHtml += `
+                    <div class="risk-item">
+                        <div class="risk-dot dot-${risk.level === 'high' ? 'red' : risk.level === 'medium' ? 'orange' : 'green'}"></div>
+                        <span>${risk.text}</span>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('riskMonitor').innerHTML = risksHtml;
+        }
+
+        // ==================== UPDATE CYCLE ====================
+        function startUpdateCycle() {
+            updateInterval = setInterval(() => {
+                // Update market data
+                marketData.spot += (Math.random() * 20 - 10);
+                marketData.change = marketData.spot - 23581.15;
+                marketData.changePercent = (marketData.change / 23581.15 * 100).toFixed(2);
+                marketData.vix = 23.84 + (Math.random() * 0.5 - 0.25);
+                marketData.updateCount++;
+                
+                // Refresh all components
+                generateOptionChain();
+                generateMarketSummary();
+                generateRecommendations();
+                generateStrategies();
+                generateAnalysisCards();
+                generatePremarketData();
+                
+                // Update footer
+                updateFooter();
+                
+            }, 15 * 60 * 1000); // 15 minutes
+        }
+
+        // ==================== HELPER FUNCTIONS ====================
+        function formatDate(date) {
+            return date.toLocaleDateString('en-IN', { 
+                day: 'numeric', 
+                month: 'short', 
+                year: 'numeric' 
+            });
+        }
+
+        function updateFooter() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-IN');
+            document.getElementById('footerInfo').innerHTML = `
+                📡 Live Updates Every 15-min · Last: ${timeStr}<br>
+                ⏰ Market Hours: 9:15 AM - 3:30 PM · Weekly Expiry: Every Tuesday<br>
+                🏦 Next Monthly: March 30, 2026 · Trading Holiday: March 31
+            `;
+        }
+
+        function switchExpiry(expiry) {
+            currentExpiry = expiry;
+            
+            // Update tabs
+            document.getElementById('tabWeekly').className = expiry === 'weekly' ? 'tab active' : 'tab';
+            document.getElementById('tabMonthly').className = expiry === 'monthly' ? 'tab active' : 'tab';
+            document.getElementById('tabNext').className = expiry === 'next' ? 'tab active' : 'tab';
+            
+            // Update ATM display
+            let atmText = 'ATM: 23,600';
+            if (expiry === 'weekly') atmText = 'ATM: 23,600 (Weekly)';
+            else if (expiry === 'monthly') atmText = 'ATM: 23,600 (Monthly)';
+            else atmText = 'ATM: 23,600 (Next Weekly)';
+            
+            document.getElementById('atmDisplay').textContent = atmText;
+            
+            // Regenerate chain
+            generateOptionChain();
+            generateRecommendations();
+        }
+    </script>
+</body>
+</html>
